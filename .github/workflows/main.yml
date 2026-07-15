@@ -20,28 +20,32 @@ jobs:
       id-token: write
 
     steps:
-
       - uses: actions/checkout@v4
 
-      - id: auth
+      - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          service_account: ${{ secrets.SERVICE_ACCOUNT }}
+          credentials_json: ${{ secrets.SERVICE_ACCOUNT }}
 
-      - uses: google-github-actions/setup-gcloud@v2
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-      - run: |
-          gcloud auth configure-docker $REGION-docker.pkg.dev --quiet
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      - run: |
-          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/hello:${{ github.sha }} .
+      - name: Build Docker Image
+        run: |
+          docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-repo/hello-python:${{ github.sha }} .
 
-      - run: |
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/hello:${{ github.sha }}
+      - name: Push Docker Image
+        run: |
+          docker push us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-repo/hello-python:${{ github.sha }}
 
-      - run: |
+      - name: Deploy to Cloud Run
+        run: |
           gcloud run deploy $SERVICE \
-          --image=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/hello:${{ github.sha }} \
-          --region=$REGION \
-          --platform=managed \
-          --allow-unauthenticated
+            --image us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-repo/hello-python:${{ github.sha }} \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated
