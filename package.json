@@ -1,7 +1,7 @@
 {
-  "name": "heart-animation",
+  "name": "hello-python",
   "version": "1.0.0",
-  "description": "Beautiful Heart Animation",
+  "description": "Heart Animation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
